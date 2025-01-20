@@ -1,0 +1,6 @@
+- Fred.org for macro , may not have daily or higher time scale
+- Yfinance, options close data essentially and historical daily data and finance info
+- DataBento, best data but very expensive, options data is almost unatainable from here.
+- Government websites for Tbills and such
+- Webscraping bond data maybe 
+- Charles Schwab API for streaming and historical prices
