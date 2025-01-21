@@ -18,12 +18,10 @@ print("Environment variables after loading:")
 print(f"APP_KEY: {os.getenv('APP_KEY')}")
 print(f"APP_SECRET exists: {'Yes' if os.getenv('APP_SECRET') else 'No'}")
 
-# Rest of your code...
-# Configuration
 CONFIG = {
-    'symbol': 'NVDA',  # Required: Any valid stock symbol (e.g., 'AAPL', 'MSFT', 'SPY')
+    'symbol': 'EUR/USD',  
     
-    # Date range for data retrieval (format: YYYY-MM-DD)
+    # Date range for data retrieval
     'start_date': '2000-01-01',
     'end_date': '2025-01-19',
     
@@ -34,42 +32,18 @@ CONFIG = {
     'app_key': os.getenv('APP_KEY'),
     'app_secret': os.getenv('APP_SECRET'),
 
+    # Period settings for daily data using yearly periods
+    'period_type': 'year',
+    'period': 3,  # Will get 3 years of data
     
-    # Period type for the data request
-    # Available options: 'day', 'month', 'year', 'ytd'
-    'period_type': 'day',
-    
-    # Number of periods to return
-    # If period_type is:
-    #   'day'   - valid values: 1, 2, 3, 4, 5, 10
-    #   'month' - valid values: 1, 2, 3, 6
-    #   'year'  - valid values: 1, 2, 3, 5, 10, 15, 20
-    #   'ytd'   - valid values: 1
-    'period': 5,
-    
-    # Frequency type of returned data
-    # If period_type is:
-    #   'day'   - valid value: 'minute'
-    #   'month' - valid values: 'daily', 'weekly'
-    #   'year'  - valid values: 'daily', 'weekly', 'monthly'
-    #   'ytd'   - valid values: 'daily', 'weekly'
-    'frequency_type': 'day: daily',
-    
-    # Frequency of returned data
-    # If frequency_type is:
-    #   'minute'  - valid values: 1, 5, 10, 15, 30
-    #   'daily'   - valid value: 1
-    #   'weekly'  - valid value: 1
-    #   'monthly' - valid value: 1
+    # Frequency settings for daily data
+    'frequency_type': 'daily',
     'frequency': 1,
     
-    # Whether to include extended hours data
+    # Additional settings
     'extended_hours': True,
-    
-    # Whether to include previous close price/date
     'need_previous_close': True
 }
-
 def setup_directory(dir_path):
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
@@ -208,35 +182,41 @@ def get_price_history(symbol, start_date_str, end_date_str, access_token):
         'Schwab-Resource-Version': '1'
     }
     
-    params = {
-        'symbol': symbol,
-        'startDate': start_date,
-        'endDate': end_date,
-        'periodType': CONFIG['period_type'],
-        'period': CONFIG['period'],
-        'frequencyType': CONFIG['frequency_type'],
-        'frequency': CONFIG['frequency'],
-        'needExtendedHoursData': CONFIG['extended_hours']
-    }
+    # List of periods to try, from longest to shortest
+    period_options = [20, 15, 10, 5, 3, 2, 1]
     
-    try:
-        response = requests.get(base_url, headers=headers, params=params)
+    for period in period_options:
+        print(f"Trying to fetch data with period: {period} years...")
         
-        if response.status_code == 200:
-            data = response.json()
-            if data.get('empty', True):
-                print("No data available for the specified parameters")
-                return None
-            return data
-        else:
-            print(f"Error: {response.status_code}")
-            print(f"Response: {response.text}")
-            return None
+        params = {
+            'symbol': symbol,
+            'startDate': start_date,
+            'endDate': end_date,
+            'periodType': CONFIG['period_type'],
+            'period': period,
+            'frequencyType': CONFIG['frequency_type'],
+            'frequency': CONFIG['frequency'],
+            'needExtendedHoursData': CONFIG['extended_hours']
+        }
+        
+        try:
+            response = requests.get(base_url, headers=headers, params=params)
             
-    except Exception as e:
-        print(f"Exception occurred: {str(e)}")
-        return None
-
+            if response.status_code == 200:
+                data = response.json()
+                if not data.get('empty', True):
+                    print(f"Successfully retrieved data with {period} year period")
+                    return data
+                print(f"No data available for {period} year period, trying next period...")
+            else:
+                print(f"Error with {period} year period: {response.status_code}")
+                print(f"Response: {response.text}")
+                
+        except Exception as e:
+            print(f"Exception occurred with {period} year period: {str(e)}")
+    
+    print("Unable to retrieve data with any period length")
+    return None
 def process_data(raw_data):
     if not raw_data or raw_data.get('empty', True):
         return None
