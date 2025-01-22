@@ -1,3 +1,5 @@
 *.env
 *tokens.json
+*.jsonvenv/
+*venv
 *.json

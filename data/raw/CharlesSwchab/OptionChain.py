@@ -12,7 +12,9 @@ from dotenv import load_dotenv
 # Configuration
 CONFIG = {
     'symbol': 'SPY',  # Required: Any valid stock symbol (e.g., 'AAPL', 'MSFT', 'SPY')
-    'save_dir': r"C:\Users\cinco\Desktop\DATA FOR SCRIPTS\Charles",
+    #'save_dir': r"C:\Users\cinco\Desktop\DATA FOR SCRIPTS\Charles",
+    'save_dir': "/Users/jazzhashzzz/Desktop/data for scripts/charles",
+
     'app_key': os.getenv('APP_KEY'),
     'app_secret': os.getenv('APP_SECRET'),
     

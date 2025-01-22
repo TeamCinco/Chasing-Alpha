@@ -1,0 +1,13 @@
+certifi==2024.12.14
+cffi==1.17.1
+charset-normalizer==3.4.1
+cryptography==44.0.0
+idna==3.10
+pycparser==2.22
+requests==2.32.3
+schwabdev==2.4.4
+tzdata==2025.1
+urllib3==2.3.0
+websockets==14.2
+pandas
+numpy
