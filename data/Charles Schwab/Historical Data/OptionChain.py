@@ -7,42 +7,35 @@ import pandas as pd
 import os
 import json
 import threading
-import os
+import schwabdev
 from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+
 # Configuration
 CONFIG = {
-    'symbol': 'SPY',  # Required: Any valid stock symbol (e.g., 'AAPL', 'MSFT', 'SPY')
-    #'save_dir': r"C:\Users\cinco\Desktop\DATA FOR SCRIPTS\Charles",
-    'save_dir': "/Users/jazzhashzzz/Desktop/data for scripts/charles",
-
+    'symbol': 'SPY',
+    'save_dir': r"C:\Users\cinco\Desktop\DATA FOR SCRIPTS\Charles",
     'app_key': os.getenv('APP_KEY'),
     'app_secret': os.getenv('APP_SECRET'),
-    
-    # Option Chain specific parameters
-    'contract_type': 'ALL',     # Options: 'CALL', 'PUT', 'ALL'
-    'strike_count': 10,         # Number of strikes above and below at-the-money
-    'strategy': 'SINGLE',       # Options: 'SINGLE', 'ANALYTICAL', 'COVERED', 'VERTICAL', 'CALENDAR', 
-                               # 'STRANGLE', 'STRADDLE', 'BUTTERFLY', 'CONDOR', 'DIAGONAL', 'COLLAR', 'ROLL'
-    'include_quotes': True,     # Whether to include underlying quotes
-    
-    # Date range for options (format: YYYY-MM-DD)
-    'from_date': None,          # Optional: Filter by expiration date
-    'to_date': None,           # Optional: Filter by expiration date
-    
-    # Additional parameters for ANALYTICAL strategy
-    'volatility': None,        # Optional: Used for theoretical calculations
-    'interest_rate': None,     # Optional: Used for theoretical calculations
-    'days_to_expiration': None,# Optional: Used for theoretical calculations
-    'underlying_price': None,  # Optional: Used for theoretical calculations
-    
-    # Optional filters
-    'exp_month': 'ALL',        # Options: 'JAN' through 'DEC', or 'ALL'
-    'option_type': None        # Optional: Additional option type filter
+    'contract_type': 'ALL',
+    'strike_count': 10,
+    'strategy': 'SINGLE',
+    'include_quotes': True,
+    'from_date': None,
+    'to_date': None,
+    'volatility': None,
+    'interest_rate': None,
+    'days_to_expiration': None,
+    'underlying_price': None,
+    'exp_month': 'ALL',
+    'option_type': None
 }
+
 def setup_directory(dir_path):
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
-        
 
 
 
@@ -160,8 +153,12 @@ def get_auth_token():
     td = response.json()
     CONFIG['token_manager'].update_tokens(td['access_token'], td['refresh_token'])
     return td['access_token']
-def get_option_chain(symbol, access_token):
-    base_url = 'https://api.schwabapi.com/marketdata/v1/chains'
+
+def get_option_chain(symbol):
+    base_url = f'https://api.schwabapi.com/marketdata/v1/chains'
+    
+    # Get the token using your existing token management
+    access_token = get_auth_token()
     
     headers = {
         'Authorization': f'Bearer {access_token}',
@@ -170,35 +167,30 @@ def get_option_chain(symbol, access_token):
         'Schwab-Resource-Version': '1'
     }
     
-    # Build parameters from config
     params = {
         'symbol': symbol,
         'contractType': CONFIG['contract_type'],
         'strikeCount': CONFIG['strike_count'],
-        'includeUnderlyingQuote': CONFIG['include_quotes'],
+        'includeQuotes': CONFIG['include_quotes'],
         'strategy': CONFIG['strategy']
     }
     
     # Add optional parameters if they exist
-    if CONFIG['from_date']:
-        params['fromDate'] = CONFIG['from_date']
-    if CONFIG['to_date']:
-        params['toDate'] = CONFIG['to_date']
-    if CONFIG['volatility']:
-        params['volatility'] = CONFIG['volatility']
-    if CONFIG['interest_rate']:
-        params['interestRate'] = CONFIG['interest_rate']
-    if CONFIG['days_to_expiration']:
-        params['daysToExpiration'] = CONFIG['days_to_expiration']
-    if CONFIG['underlying_price']:
-        params['underlyingPrice'] = CONFIG['underlying_price']
-    if CONFIG['exp_month'] != 'ALL':
-        params['expMonth'] = CONFIG['exp_month']
-    if CONFIG['option_type']:
-        params['optionType'] = CONFIG['option_type']
+    if CONFIG['from_date']: params['fromDate'] = CONFIG['from_date']
+    if CONFIG['to_date']: params['toDate'] = CONFIG['to_date']
+    if CONFIG['volatility']: params['volatility'] = CONFIG['volatility']
+    if CONFIG['interest_rate']: params['interestRate'] = CONFIG['interest_rate']
+    if CONFIG['days_to_expiration']: params['daysToExpiration'] = CONFIG['days_to_expiration']
+    if CONFIG['underlying_price']: params['underlyingPrice'] = CONFIG['underlying_price']
+    if CONFIG['exp_month'] != 'ALL': params['expMonth'] = CONFIG['exp_month']
+    if CONFIG['option_type']: params['optionType'] = CONFIG['option_type']
     
     try:
-        response = requests.get(base_url, headers=headers, params=params)
+        response = requests.get(
+            base_url,
+            headers=headers,
+            params=params
+        )
         
         if response.status_code == 200:
             return response.json()
@@ -210,7 +202,6 @@ def get_option_chain(symbol, access_token):
     except Exception as e:
         print(f"Exception occurred: {str(e)}")
         return None
-
 def process_option_data(raw_data):
     if not raw_data:
         return None
@@ -297,26 +288,18 @@ def print_option_statistics(data_dict):
             print(data_dict['puts'][available_columns].describe())
 def main():
     print("Starting main execution...")
-    # Setup
     setup_directory(CONFIG['save_dir'])
-    access_token = get_auth_token()
     
     print("Fetching option chain data...")
-    # Get option chain data
-    raw_data = get_option_chain(CONFIG['symbol'], access_token)
+    raw_data = get_option_chain(CONFIG['symbol'])
     
     print("Processing data...")
-    # Process data
     processed_data = process_option_data(raw_data)
     
     if processed_data:
         print("Saving data files...")
-        # Save data
         save_option_data(processed_data, CONFIG['symbol'], CONFIG['save_dir'])
-        
-        # Print statistics
         print_option_statistics(processed_data)
-        
         return processed_data
     else:
         print("Failed to retrieve and process option data")
