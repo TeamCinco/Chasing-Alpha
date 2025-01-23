@@ -186,7 +186,7 @@ class MarketAnalyzer:
             statistical_tests.to_excel(writer, sheet_name='Statistical Tests')
 
 def main():
-    data_path = r"C:\Users\cinco\Desktop\DATA FOR SCRIPTS\Charles\Historical Data\SPY_5day_30minute_ext_2000-01-01_to_2025-01-19.csv"
+    data_path = r"C:\Users\cinco\Desktop\DATA FOR SCRIPTS\Charles\Historical Data\SPY_5day_30minute_ext_2000-01-01_to_2025-01-23.csv"
     output_path = r"C:\Users\cinco\Desktop\DATA FOR SCRIPTS\Charles\Returns Research"
     
     analyzer = MarketAnalyzer(data_path, output_path)

@@ -147,7 +147,7 @@ def main():
     # File paths
     puts_path = r"C:\Users\cinco\Desktop\DATA FOR SCRIPTS\Charles\Historical Data\SPY_puts_20250122_204424.csv"
     calls_path = r"C:\Users\cinco\Desktop\DATA FOR SCRIPTS\Charles\Historical Data\SPY_calls_20250122_204424.csv"
-    price_history_path = r"C:\Users\cinco\Desktop\DATA FOR SCRIPTS\Charles\Historical Data\SPY_5day_30minute_ext_2000-01-01_to_2025-01-19.csv"
+    price_history_path = r"C:\Users\cinco\Desktop\DATA FOR SCRIPTS\Charles\Historical Data\SPY_5day_30minute_ext_2000-01-01_to_2025-01-23.csv"
     output_path = r"C:\Users\cinco\Desktop\DATA FOR SCRIPTS\Charles\Analysis Results"
     
     # Initialize analyzer

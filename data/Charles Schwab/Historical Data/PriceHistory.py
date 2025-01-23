@@ -21,15 +21,15 @@ print(f"APP_SECRET exists: {'Yes' if os.getenv('APP_SECRET') else 'No'}")
 # Rest of your code...
 # Configuration
 CONFIG = {
-    'symbol': 'NVDA',  # Required: Any valid stock symbol (e.g., 'AAPL', 'MSFT', 'SPY')
+    'symbol': 'SPY',  # Required: Any valid stock symbol (e.g., 'AAPL', 'MSFT', 'SPY')
     
     # Date range for data retrieval (format: YYYY-MM-DD)
     'start_date': '2000-01-01',
-    'end_date': '2025-01-19',
+    'end_date': '2025-01-23',
     
     # Directory for saving data
-    #'save_dir': r"C:\Users\cinco\Desktop\DATA FOR SCRIPTS\Charles",
-    'save_dir': "/Users/jazzhashzzz/Desktop/data for scripts/charles",
+    'save_dir': r"C:\Users\cinco\Desktop\DATA FOR SCRIPTS\Charles",
+    #'save_dir': "/Users/jazzhashzzz/Desktop/data for scripts/charles",
     
     # API credentials
     'app_key': os.getenv('APP_KEY'),
@@ -54,7 +54,7 @@ CONFIG = {
     #   'month' - valid values: 'daily', 'weekly'
     #   'year'  - valid values: 'daily', 'weekly', 'monthly'
     #   'ytd'   - valid values: 'daily', 'weekly'
-    'frequency_type': 'day: daily',
+    'frequency_type': 'minute',
     
     # Frequency of returned data
     # If frequency_type is:
@@ -62,7 +62,7 @@ CONFIG = {
     #   'daily'   - valid value: 1
     #   'weekly'  - valid value: 1
     #   'monthly' - valid value: 1
-    'frequency': 1,
+    'frequency': 30,
     
     # Whether to include extended hours data
     'extended_hours': True,
@@ -71,7 +71,7 @@ CONFIG = {
     'need_previous_close': True
 }
 
-def setup_directory(dir_path):
+def setup_directory(dir_path):#1
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
         
