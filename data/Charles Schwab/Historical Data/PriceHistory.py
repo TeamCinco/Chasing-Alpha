@@ -28,8 +28,8 @@ CONFIG = {
     'end_date': '2025-01-23',
     
     # Directory for saving data
-    'save_dir': r"C:\Users\cinco\Desktop\DATA FOR SCRIPTS\Charles",
-    #'save_dir': "/Users/jazzhashzzz/Desktop/data for scripts/charles",
+    #'save_dir': r"C:\Users\cinco\Desktop\DATA FOR SCRIPTS\Charles",
+    'save_dir': "/Users/jazzhashzzz/Desktop/data for scripts/charles/Historical Equities Data",
     
     # API credentials
     'app_key': os.getenv('APP_KEY'),

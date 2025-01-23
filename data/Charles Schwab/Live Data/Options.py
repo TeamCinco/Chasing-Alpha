@@ -14,8 +14,9 @@ class SchwabOptionsStreamer:
         self.client = schwabdev.Client(app_key, app_secret)
         self.option_symbols = option_symbols
         self.stream = self.client.stream
-        self.output_dir = r"C:\Users\cinco\Desktop\DATA FOR SCRIPTS\Charles\Live Data"
-        
+        #self.output_dir = r"C:\Users\cinco\Desktop\DATA FOR SCRIPTS\Charles\Live Data"
+        self.output_dir = '/Users/jazzhashzzz/Desktop/data for scripts/charles/Live Data'
+
         # Create output directory if it doesn't exist
         if not os.path.exists(self.output_dir):
             os.makedirs(self.output_dir)
@@ -146,7 +147,7 @@ def main():
         'app_key': os.getenv('APP_KEY'),
         'app_secret': os.getenv('APP_SECRET'),
         'option_symbols': [
-            'SPY   250121C00595000'
+            'SPY   250930C00605000'
         ]
     }
 
