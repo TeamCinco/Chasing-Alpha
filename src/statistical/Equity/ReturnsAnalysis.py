@@ -7,6 +7,7 @@ from pathlib import Path
 from datetime import datetime, time
 from statsmodels.stats.diagnostic import acorr_ljungbox
 import statsmodels.api as sm
+import openpyxl
 
 class MarketAnalyzer:
     def __init__(self, data_path, output_path):
@@ -77,55 +78,53 @@ class MarketAnalyzer:
         plt.tight_layout()
         plt.savefig(self.output_path / 'return_distributions.png')
         plt.close()
-
-    def analyze_intervals(self):
-        """Analyze returns by intraday interval"""
-        interval_stats = {}
+    def analyze_log_distributions(self):
+        """Analyze log return distributions"""
+        fig, axes = plt.subplots(2, 2, figsize=(15, 10))
+        fig.suptitle('Log Return Distributions')
         
+        for idx, col in enumerate(['open', 'high', 'low', 'close']):
+            ax = axes[idx // 2, idx % 2]
+            
+            # Plot histogram with KDE for log returns
+            sns.histplot(data=self.data[f'{col}_log_returns'].dropna(), 
+                        stat='density', kde=True, ax=ax)
+            
+            # Plot normal distribution
+            x = np.linspace(self.data[f'{col}_log_returns'].min(), 
+                        self.data[f'{col}_log_returns'].max(), 100)
+            mu = self.data[f'{col}_log_returns'].mean()
+            sigma = self.data[f'{col}_log_returns'].std()
+            normal_dist = stats.norm.pdf(x, mu, sigma)
+            ax.plot(x, normal_dist, 'r--', label='Normal Distribution')
+            
+            ax.set_title(f'{col.capitalize()} Log Returns')
+            ax.set_xlabel('Log Return')
+            ax.set_ylabel('Density')
+            ax.legend()
+        
+        plt.tight_layout()
+        plt.savefig(self.output_path / 'log_return_distributions.png')
+        plt.close()
+    def analyze_intervals(self):
+        """Analyze returns by hourly interval"""
+        time_mapping = {i: f"{i:02d}:00-{(i+1):02d}:00" for i in range(24)}
+        
+        all_stats = pd.DataFrame()
         for col in ['open', 'high', 'low', 'close']:
-            # Group by interval and calculate statistics
-            stats_df = self.data.groupby('interval_num')[f'{col}_returns'].agg([
+            stats = self.data.groupby(self.data['datetime'].dt.hour)[f'{col}_returns'].agg([
                 'mean', 
                 'std', 
                 'skew',
-                ('kurtosis', lambda x: stats.kurtosis(x.dropna())),  # Changed from 'kurt'
+                ('kurtosis', lambda x: stats.kurtosis(x.dropna())),
                 ('jb_stat', lambda x: stats.jarque_bera(x.dropna())[0]),
                 ('jb_pval', lambda x: stats.jarque_bera(x.dropna())[1])
             ])
-            
-            interval_stats[col] = stats_df
+            stats['time_period'] = stats.index.map(time_mapping)
+            stats['price_type'] = col
+            all_stats = pd.concat([all_stats, stats])
         
-        # Combine all statistics
-        self.intervals = pd.concat(interval_stats, axis=1, names=['price_type', 'statistic'])
-    def analyze_volatility_patterns(self):
-        """Analyze volatility patterns throughout the day"""
-        # Calculate rolling volatility
-        window = 5  # Adjust window size as needed
-        for col in ['open', 'high', 'low', 'close']:
-            self.data[f'{col}_rolling_vol'] = self.data[f'{col}_returns'].rolling(window).std()
-        
-        # Create figure
-        fig, ax = plt.subplots(figsize=(15, 8))
-        
-        # Create melted dataframe for boxplot
-        vol_data = self.data.melt(
-            id_vars=['interval_num'],
-            value_vars=[f'{col}_rolling_vol' for col in ['open', 'high', 'low', 'close']],
-            var_name='price_type',
-            value_name='volatility'
-        )
-        
-        # Create boxplot using the melted data
-        sns.boxplot(data=vol_data, x='interval_num', y='volatility', hue='price_type')
-        
-        ax.set_title('Intraday Volatility Patterns')
-        ax.set_xlabel('30-minute Interval')
-        ax.set_ylabel('Rolling Volatility')
-        plt.xticks(rotation=45)
-        plt.tight_layout()
-        plt.savefig(self.output_path / 'volatility_patterns.png')
-        plt.close()
-
+        self.intervals = all_stats.reset_index()
     def perform_statistical_tests(self):
         """Perform various statistical tests on the return series"""
         results = {}
@@ -162,7 +161,55 @@ class MarketAnalyzer:
             }
         
         return pd.DataFrame(results).T
-
+    
+    
+    def analyze_intervals(self):
+        """Analyze returns by intraday interval with time mapping"""
+        interval_stats = {}
+        
+        # Create time mapping for intervals
+        time_mapping = {i: f"{i//2:02d}:00-{(i//2)+1:02d}:00" for i in range(48)}
+        
+        for col in ['open', 'high', 'low', 'close']:
+            # Group by interval and calculate statistics
+            stats_df = self.data.groupby('interval_num')[f'{col}_returns'].agg([
+                'mean', 
+                'std', 
+                'skew',
+                ('kurtosis', lambda x: stats.kurtosis(x.dropna())),
+                ('jb_stat', lambda x: stats.jarque_bera(x.dropna())[0]),
+                ('jb_pval', lambda x: stats.jarque_bera(x.dropna())[1])
+            ])
+            
+            # Add time period column
+            stats_df['time_period'] = stats_df.index.map(time_mapping)
+            
+            interval_stats[col] = stats_df
+        
+        # Combine all statistics
+        self.intervals = pd.concat(interval_stats, axis=1, names=['price_type', 'statistic'])
+    def analyze_vol_patterns(self):
+        """Analyze hourly volatility patterns"""
+        # Calculate hourly volatility
+        hourly_vol = self.data.groupby(self.data['datetime'].dt.hour)['close'].apply(
+            lambda x: np.std(x.pct_change())
+        )
+        
+        plt.figure(figsize=(12, 6))
+        plt.plot(hourly_vol.index, hourly_vol.values)
+        plt.title('Average Hourly Volatility')
+        plt.xlabel('Hour')
+        plt.ylabel('Volatility')
+        
+        # Add session backgrounds
+        plt.axvspan(3, 11, alpha=0.2, color='blue', label='London')
+        plt.axvspan(8, 17, alpha=0.2, color='red', label='New York')
+        plt.axvspan(8, 11, alpha=0.3, color='purple', label='Overlap')
+        
+        plt.legend()
+        plt.grid(True)
+        plt.savefig(self.output_path / 'volatility_patterns.png')
+        plt.close()
     def save_results(self):
         """Save all results to Excel"""
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -186,15 +233,18 @@ class MarketAnalyzer:
             statistical_tests.to_excel(writer, sheet_name='Statistical Tests')
 
 def main():
-    data_path = r"C:\Users\cinco\Desktop\DATA FOR SCRIPTS\Charles\Historical Data\SPY_5day_30minute_ext_2000-01-01_to_2025-01-23.csv"
-    output_path = r"C:\Users\cinco\Desktop\DATA FOR SCRIPTS\Charles\Returns Research"
+    #data_path = r"C:\Users\cinco\Desktop\DATA FOR SCRIPTS\Charles\Historical Data\SPY_5day_30minute_ext_2000-01-01_to_2025-01-23.csv"
+    #output_path = r"C:\Users\cinco\Desktop\DATA FOR SCRIPTS\Charles\Returns Research"
+    data_path = "/Users/jazzhashzzz/Desktop/data for scripts/charles/Historical Equities Data/SPY_5day_30minute_ext_2000-01-01_to_2025-01-23.csv"
+    output_path = "/Users/jazzhashzzz/Desktop/data for scripts/charles/Returns Research"
     
     analyzer = MarketAnalyzer(data_path, output_path)
     analyzer.load_data()
     analyzer.calculate_returns()
     analyzer.analyze_distributions()
+    analyzer.analyze_log_distributions() # Added this line
     analyzer.analyze_intervals()
-    analyzer.analyze_volatility_patterns()
+    analyzer.analyze_vol_patterns()
     analyzer.save_results()
 
 if __name__ == "__main__":
