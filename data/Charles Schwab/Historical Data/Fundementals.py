@@ -13,7 +13,7 @@ class Config:
     def __init__(self):
         self.app_key = os.getenv('APP_KEY'),
         self.app_secret = os.getenv('APP_SECRET'),
-        self.save_dir = r"C:\Users\cinco\Desktop\DATA FOR SCRIPTS\Charles"
+        self.save_dir = r"C:\Users\cinco\Desktop\DATA FOR SCRIPTS\Charles\Fundamentals"
         self.token_manager = TokenManager()
 
     def initialize_token_refresh(self):
@@ -212,7 +212,7 @@ def main():
     
     # Sample symbols (can be modified as needed)
     #symbols = ['AAPL', 'MSFT', 'GOOGL', 'AMZN']
-    symbols = ['SPY']
+    symbols = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA', 'NFLX', 'FB', 'NVDA', 'AMD', 'INTC']
 
     # Fetch data
     print("Fetching fundamental data...")

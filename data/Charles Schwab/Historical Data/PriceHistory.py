@@ -18,65 +18,45 @@ print("Environment variables after loading:")
 print(f"APP_KEY: {os.getenv('APP_KEY')}")
 print(f"APP_SECRET exists: {'Yes' if os.getenv('APP_SECRET') else 'No'}")
 
-# Rest of your code...
+# Define stock tickers to analyze
+stock_tickers = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'TSLA', 'NFLX', 'NVDA', 'AMD', 'INTC', 
+                'IBM', 'CSCO', 'ORCL', 'QCOM', 'TXN', 'AVGO', 'ADBE', 'CRM', 'INTU', 'NOW', 
+                'SCHD', 'JEPI', 'SPY', 'VTI', 'VOO', 'IWM', 'XLF', 'XLY', 'XLC', 'XLI', 'XLB']
+
+# Define index tickers to analyze
+index_tickers = ['^GSPC', '^IXIC', '^DJI']
+
+# All tickers combined
+all_tickers = stock_tickers + index_tickers
+
 # Configuration
 CONFIG = {
-    'symbol': 'SPY',  # Required: Any valid stock symbol (e.g., 'AAPL', 'MSFT', 'SPY')
+    'tickers': all_tickers,  # Now using the ticker lists instead of a single symbol
     
     # Date range for data retrieval (format: YYYY-MM-DD)
     'start_date': '2000-01-01',
-    'end_date': '2025-01-23',
+    'end_date': '2025-04-27',
     
     # Directory for saving data
-    #'save_dir': r"C:\Users\cinco\Desktop\DATA FOR SCRIPTS\Charles",
-    'save_dir': "/Users/jazzhashzzz/Desktop/data for scripts/charles/Historical Equities Data",
+    'save_dir': r"C:\Users\cinco\Desktop\Cinco-HF\results\Charles\Historical Equities Data",
     
     # API credentials
     'app_key': os.getenv('APP_KEY'),
     'app_secret': os.getenv('APP_SECRET'),
-
     
     # Period type for the data request
-    # Available options: 'day', 'month', 'year', 'ytd'
     'period_type': 'day',
-    
-    # Number of periods to return
-    # If period_type is:
-    #   'day'   - valid values: 1, 2, 3, 4, 5, 10
-    #   'month' - valid values: 1, 2, 3, 6
-    #   'year'  - valid values: 1, 2, 3, 5, 10, 15, 20
-    #   'ytd'   - valid values: 1
     'period': 5,
-    
-    # Frequency type of returned data
-    # If period_type is:
-    #   'day'   - valid value: 'minute'
-    #   'month' - valid values: 'daily', 'weekly'
-    #   'year'  - valid values: 'daily', 'weekly', 'monthly'
-    #   'ytd'   - valid values: 'daily', 'weekly'
     'frequency_type': 'minute',
-    
-    # Frequency of returned data
-    # If frequency_type is:
-    #   'minute'  - valid values: 1, 5, 10, 15, 30
-    #   'daily'   - valid value: 1
-    #   'weekly'  - valid value: 1
-    #   'monthly' - valid value: 1
     'frequency': 30,
-    
-    # Whether to include extended hours data
     'extended_hours': True,
-    
-    # Whether to include previous close price/date
     'need_previous_close': True
 }
 
-def setup_directory(dir_path):#1
+def setup_directory(dir_path):
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
         
-
-
 class TokenManager:
     def __init__(self, token_file='tokens.json'):
         self.token_file = token_file
@@ -226,28 +206,29 @@ def get_price_history(symbol, start_date_str, end_date_str, access_token):
         if response.status_code == 200:
             data = response.json()
             if data.get('empty', True):
-                print("No data available for the specified parameters")
+                print(f"No data available for {symbol} with the specified parameters")
                 return None
             return data
         else:
-            print(f"Error: {response.status_code}")
+            print(f"Error for {symbol}: {response.status_code}")
             print(f"Response: {response.text}")
             return None
             
     except Exception as e:
-        print(f"Exception occurred: {str(e)}")
+        print(f"Exception occurred for {symbol}: {str(e)}")
         return None
 
-def process_data(raw_data):
+def process_data(raw_data, symbol):
     if not raw_data or raw_data.get('empty', True):
         return None
         
     df = pd.DataFrame(raw_data['candles'])
     df['datetime'] = pd.to_datetime(df['datetime'], unit='ms')
-    columns_order = ['datetime', 'open', 'high', 'low', 'close', 'volume']
+    df['symbol'] = symbol  # Add symbol column
+    columns_order = ['symbol', 'datetime', 'open', 'high', 'low', 'close', 'volume']
     return df[columns_order]
 
-def save_data(df, config, save_dir):
+def save_data(df, config, symbol, save_dir):
     if df is None:
         return
         
@@ -258,17 +239,17 @@ def save_data(df, config, save_dir):
     
     filename = os.path.join(
         save_dir, 
-        f"{config['symbol']}_{period_suffix}_{freq_suffix}{extended_hours}_{config['start_date']}_to_{config['end_date']}.csv"
+        f"{symbol}_{period_suffix}_{freq_suffix}{extended_hours}_{config['start_date']}_to_{config['end_date']}.csv"
     )
     
     df.to_csv(filename, index=False)
     print(f"Data saved to {filename}")
 
-def print_statistics(df):
+def print_statistics(df, symbol):
     if df is None:
         return
         
-    print("\nDataset Statistics:")
+    print(f"\nDataset Statistics for {symbol}:")
     print(f"Total number of records: {len(df)}")
     print("\nData range:")
     print(f"Start date: {df['datetime'].min()}")
@@ -288,28 +269,39 @@ def main():
     setup_directory(CONFIG['save_dir'])
     access_token = get_auth_token()
     
-    # Get data
-    raw_data = get_price_history(
-        CONFIG['symbol'], 
-        CONFIG['start_date'], 
-        CONFIG['end_date'], 
-        access_token
-    )
+    results = {}
     
-    # Process data
-    df = process_data(raw_data)
+    # Process each ticker
+    for ticker in CONFIG['tickers']:
+        print(f"\nProcessing {ticker}...")
+        
+        # Get data
+        raw_data = get_price_history(
+            ticker, 
+            CONFIG['start_date'], 
+            CONFIG['end_date'], 
+            access_token
+        )
+        
+        # Process data
+        df = process_data(raw_data, ticker)
+        
+        if df is not None:
+            # Save data
+            save_data(df, CONFIG, ticker, CONFIG['save_dir'])
+            
+            # Print statistics
+            print_statistics(df, ticker)
+            
+            # Store in results dictionary
+            results[ticker] = df
+        else:
+            print(f"Failed to retrieve and process data for {ticker}")
+            
+        # Add a small delay to avoid rate limiting
+        time.sleep(1)
     
-    if df is not None:
-        # Save data using config
-        save_data(df, CONFIG, CONFIG['save_dir'])
-        
-        # Print statistics
-        print_statistics(df)
-        
-        return df
-    else:
-        print("Failed to retrieve and process data")
-        return None
+    return results
 
 if __name__ == "__main__":
-    df = main()
+    results = main()

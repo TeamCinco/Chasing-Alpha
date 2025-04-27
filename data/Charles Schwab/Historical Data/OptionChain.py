@@ -7,7 +7,6 @@ import pandas as pd
 import os
 import json
 import threading
-import schwabdev
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -17,7 +16,7 @@ load_dotenv()
 CONFIG = {
     'symbol': 'SPY',
     #'save_dir': r"C:\Users\cinco\Desktop\DATA FOR SCRIPTS\Charles",
-    'save_dir': "/Users/jazzhashzzz/Desktop/data for scripts/charles/Historical Options Data",
+    'save_dir': r"C:\Users\cinco\Desktop\Cinco-HF\results\Charles\Historical Options Data",
 
     'app_key': os.getenv('APP_KEY'),
     'app_secret': os.getenv('APP_SECRET'),
