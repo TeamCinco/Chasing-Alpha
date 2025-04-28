@@ -19,12 +19,20 @@ print(f"APP_KEY: {os.getenv('APP_KEY')}")
 print(f"APP_SECRET exists: {'Yes' if os.getenv('APP_SECRET') else 'No'}")
 
 # Define stock tickers to analyze
-stock_tickers = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'TSLA', 'NFLX', 'NVDA', 'AMD', 'INTC', 
-                'IBM', 'CSCO', 'ORCL', 'QCOM', 'TXN', 'AVGO', 'ADBE', 'CRM', 'INTU', 'NOW', 
-                'SCHD', 'JEPI', 'SPY', 'VTI', 'VOO', 'IWM', 'XLF', 'XLY', 'XLC', 'XLI', 'XLB']
+stock_tickers = [
+    'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'TSLA', 'NFLX', 'NVDA', 'AMD', 'INTC',
+    'IBM', 'CSCO', 'ORCL', 'QCOM', 'TXN', 'AVGO', 'ADBE', 'CRM', 'INTU', 'NOW',
+    'SHOP', 'SNOW', 'UBER', 'LYFT', 'DDOG', 'PANW', 'ZS', 'CRWD', 'PLTR', 'DOCU',
+    'ASML', 'ADSK', 'ANET', 'MRVL', 'MU', 'TEAM', 'TWLO', 'SQ', 'PYPL', 'SMCI'
+]
 
-# Define index tickers to analyze
-index_tickers = ['^GSPC', '^IXIC', '^DJI']
+# Define index and sector tickers to analyze
+index_tickers = [
+    '^GSPC', '^IXIC', '^DJI', '^RUT', '^VIX',
+    'SPY', 'QQQ', 'VTI', 'VOO', 'DIA', 'IWM',
+    'XLF', 'XLY', 'XLC', 'XLI', 'XLB', 'XLK', 'XLV', 'XLU', 'XLE', 'XBI',
+    'SMH', 'SOXX', 'ARKK'
+]
 
 # All tickers combined
 all_tickers = stock_tickers + index_tickers
@@ -38,8 +46,9 @@ CONFIG = {
     'end_date': '2025-04-27',
     
     # Directory for saving data
-    'save_dir': r"C:\Users\cinco\Desktop\Cinco-HF\results\Charles\Historical Equities Data",
-    
+    #'save_dir': r"C:\Users\cinco\Desktop\Cinco-HF\results\Charles\Historical Equities Data",
+    'save_dir': "/Users/jazzhashzzz/Desktop/Cinco-HF/results/Charles/Historical Equities Data/4/28",
+
     # API credentials
     'app_key': os.getenv('APP_KEY'),
     'app_secret': os.getenv('APP_SECRET'),
