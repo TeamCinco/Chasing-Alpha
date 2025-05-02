@@ -20,19 +20,24 @@ print(f"APP_SECRET exists: {'Yes' if os.getenv('APP_SECRET') else 'No'}")
 
 # Define stock tickers to analyze
 stock_tickers = [
-    'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'TSLA', 'NFLX', 'NVDA', 'AMD', 'INTC',
+    'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'NVDA', 'AMD', 'INTC',
     'IBM', 'CSCO', 'ORCL', 'QCOM', 'TXN', 'AVGO', 'ADBE', 'CRM', 'INTU', 'NOW',
-    'SHOP', 'SNOW', 'UBER', 'LYFT', 'DDOG', 'PANW', 'ZS', 'CRWD', 'PLTR', 'DOCU',
-    'ASML', 'ADSK', 'ANET', 'MRVL', 'MU', 'TEAM', 'TWLO', 'SQ', 'PYPL', 'SMCI'
+    'SHOP', 'SNOW', 'DDOG', 'PANW', 'ZS', 'CRWD', 'PLTR', 'DOCU',
+    'ASML', 'ADSK', 'ANET', 'MRVL', 'MU', 'TEAM', 'TWLO', 'SMCI',
+    'MDB', 'NET', 'OKTA', 'FSLY', 'RBLX', 'ESTC', 'SPLK', 'APPN', 'ZS',
+    'BILL', 'HUBS', 'S', 'U', 'AKAM', 'GLBE', 'WDAY', 'DT', 'CYBR', 'SAMSUNG'
 ]
+
 
 # Define index and sector tickers to analyze
 index_tickers = [
-    '^GSPC', '^IXIC', '^DJI', '^RUT', '^VIX',
-    'SPY', 'QQQ', 'VTI', 'VOO', 'DIA', 'IWM',
-    'XLF', 'XLY', 'XLC', 'XLI', 'XLB', 'XLK', 'XLV', 'XLU', 'XLE', 'XBI',
-    'SMH', 'SOXX', 'ARKK'
+    '^GSPC', '^IXIC', '^DJI', '^RUT', '^VIX',  # major US indices + volatility index
+    'SPY', 'QQQ', 'VTI', 'VOO', 'DIA', 'IWM',  # major ETFs tracking market indices
+    'XLK', 'SMH', 'SOXX', 'ARKK',              # tech-focused ETFs
+    'XSD', 'IGV', 'SKYY', 'FINX', 'HACK',      # semis, software, cloud, fintech, cyber
+    'FTEC', 'VGT', 'IYW'                       # broad tech ETFs (Fidelity, Vanguard, iShares)
 ]
+
 
 # All tickers combined
 all_tickers = stock_tickers + index_tickers
@@ -42,24 +47,36 @@ CONFIG = {
     'tickers': all_tickers,  # Now using the ticker lists instead of a single symbol
     
     # Date range for data retrieval (format: YYYY-MM-DD)
-    'start_date': '2000-01-01',
-    'end_date': '2025-04-27',
+    'start_date': '2010-01-01',
+    'end_date': '2025-05-01',
     
     # Directory for saving data
     #'save_dir': r"C:\Users\cinco\Desktop\Cinco-HF\results\Charles\Historical Equities Data",
-    'save_dir': "/Users/jazzhashzzz/Desktop/Cinco-HF/results/Charles/Historical Equities Data/4/28",
+    'save_dir': "/Users/jazzhashzzz/Desktop/Cinco-HF/results/Charles/Historical Equities Data/4.28",
 
     # API credentials
     'app_key': os.getenv('APP_KEY'),
     'app_secret': os.getenv('APP_SECRET'),
     
     # Period type for the data request
-    'period_type': 'day',
-    'period': 5,
-    'frequency_type': 'minute',
-    'frequency': 30,
+    #'period_type': 'day',
+    #'period': 5,
+    #'frequency_type': 'minute',
+    #'frequency': 30,
+    #'extended_hours': True,
+    #'need_previous_close': True
+
+    
+    # Period type for the data request
+    'period_type': 'year',     # Change this to 'year'
+    'period': 10,               # Valid values for year are 1, 2, 3, 5, 10, 15, 20
+    'frequency_type': 'daily', # For year periodType, valid values are daily, weekly, monthly
+    'frequency': 1,            # For monthly frequency_type, valid value is 1
     'extended_hours': True,
     'need_previous_close': True
+    # Keep your existing start_date and end_date parameters
+     
+
 }
 
 def setup_directory(dir_path):
