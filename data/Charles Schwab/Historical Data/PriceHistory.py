@@ -88,7 +88,7 @@ CONFIG = {
     
     # Date range for data retrieval (format: YYYY-MM-DD)
     'start_date': '2021-01-01',
-    'end_date': '2025-05-13',
+    'end_date': '2025-05-14',
     
     # Directory for saving data
     #'save_dir': r"C:\Users\cinco\Desktop\Cinco-HF\results\Charles\Historical Equities Data",
