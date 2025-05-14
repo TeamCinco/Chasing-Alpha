@@ -1,4 +1,4 @@
-stock_tickers: [
+stock_tickers = [
     "MSFT",
     "AAPL",
     "NVDA",

@@ -92,7 +92,7 @@ CONFIG = {
     
     # Directory for saving data
     #'save_dir': r"C:\Users\cinco\Desktop\Cinco-HF\results\Charles\Historical Equities Data",
-    'save_dir': "/Users/jazzhashzzz/Desktop/Cinco-Quant/00_raw_data/5.13",
+    'save_dir': "/Users/jazzhashzzz/Desktop/Cinco-Quant/00_raw_data/5.14",
 
     # API credentials
     'app_key': os.getenv('APP_KEY'),
