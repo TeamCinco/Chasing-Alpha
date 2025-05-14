@@ -20,21 +20,61 @@ print(f"APP_SECRET exists: {'Yes' if os.getenv('APP_SECRET') else 'No'}")
 
 # Define stock tickers to analyze
 stock_tickers = [
+    # Original mega-cap tech
     'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'NVDA', 'AMD', 'INTC',
     'IBM', 'CSCO', 'ORCL', 'QCOM', 'TXN', 'AVGO', 'ADBE', 'CRM', 'INTU', 'NOW',
     'SHOP', 'SNOW', 'DDOG', 'PANW', 'ZS', 'CRWD', 'PLTR', 'DOCU',
     'ASML', 'ADSK', 'ANET', 'MRVL', 'MU', 'TEAM', 'TWLO', 'SMCI',
     'MDB', 'NET', 'OKTA', 'FSLY', 'RBLX', 'ESTC', 'SPLK', 'APPN', 'ZS',
-    'BILL', 'HUBS', 'S', 'U', 'AKAM', 'GLBE', 'WDAY', 'DT', 'CYBR', 'SAMSUNG'
+    'BILL', 'HUBS', 'S', 'U', 'AKAM', 'GLBE', 'WDAY', 'DT', 'CYBR', 'SAMSUNG',
+    
+    # Additional semiconductors
+    'TSM', 'NXPI', 'KLAC', 'LRCX', 'AMAT', 'ON', 'GFS', 'WOLF', 'MPWR', 'ADI', 
+    'STX', 'WDC', 'ENPH', 'SEDG', 'CREE', 'SWKS', 'SYNA', 'ENTG', 'OLED', 'POWI',
+    
+    # Additional software/cloud
+    'ZM', 'COUP', 'PD', 'PING', 'VCRA', 'ZI', 'PATH', 'AI', 'ONDS', 'SMAR',
+    'DOCN', 'GTLB', 'CFLT', 'HIMS', 'FROG', 'NCNO', 'MNDY', 'DAVA', 'DBX', 'ASAN',
+    'SUMO', 'LYFT', 'UBER', 'ABNB', 'DASH', 'PTC', 'QLYS', 'TENB', 'RPD', 'MIME',
+    
+    # Hardware & equipment
+    'HPQ', 'HPE', 'DELL', 'STX', 'WDC', 'NTAP', 'PSTG', 'NOK', 'ERIC', 'JNPR',
+    'GLW', 'VIAV', 'CIEN', 'INFN', 'COHR', 'LITE', 'IIVI', 'MTSI', 'LOGI', 'HEAR',
+    
+    # Gaming & entertainment
+    'EA', 'ATVI', 'TTWO', 'NTES', 'SONY', 'NTDOY', 'OTGLY', 'SE', 'NFLX', 'DIS',
+    'ROKU', 'SPOT', 'SIRI', 'TME', 'WBD', 'PARA', 'CMCSA', 'LYV', 'PINS', 'SNAP',
+    
+    # Fintech
+    'SQ', 'PYPL', 'COIN', 'HOOD', 'UPST', 'SOFI', 'AFRM', 'MELI', 'GPN', 'FIS',
+    'FISV', 'MA', 'V', 'AXP', 'INMD', 'RKT', 'LC', 'GDOT', 'WU', 'EEFT',
+    
+    # International tech
+    'BABA', 'JD', 'BIDU', 'PDD', 'TCEHY', '9988.HK', '9618.HK', '3690.HK', 'SAP',
+    '005930.KS', 'TTE', 'SHOP.TO', 'BB', 'CGEMY', 'DASTY', 'SIEGY', 'FJTSY', 'HMC',
+    
+    # Electric vehicles & clean tech
+    'TSLA', 'NIO', 'RIVN', 'LCID', 'XPEV', 'FSR', 'F', 'GM', 'CHPT', 'BLNK',
+    'PLUG', 'FCEL', 'BE', 'NEE', 'STEM', 'RUN', 'SPWR', 'NOVA', 'TAN', 'FAN',
+    
+    # Healthcare tech
+    'TDOC', 'DOCS', 'AMWL', 'ONEM', 'VEEV', 'CERT', 'CERN', 'DXCM', 'HOLX', 'ISRG',
+    'IRTC', 'NVTA', 'PHR', 'PACB', 'DNA', 'CRISPR', 'ILMN', 'EXAS', 'GH', 'GDRX',
+    
+    # Robotics & automation
+    'ROK', 'ABB', 'HON', 'IR', 'EMR', 'AME', 'FTV', 'NDSN', 'GRMN', 'IRBT',
+    'ZBRA', 'CGNX', 'ISRG', 'NVTS', 'TER', 'CCMP', 'KEYS', 'A', 'ITRI', 'FARO',
+    
+    # Cybersecurity (additional)
+    'FTNT', 'CHKP', 'RPD', 'VRNS', 'SAIL', 'SCWX', 'SOND', 'NLOK', 'SIMO', 'ATEN'
 ]
-
 
 # Define index and sector tickers to analyze
 index_tickers = [
     '^GSPC', '^IXIC', '^DJI', '^RUT', '^VIX',  # major US indices + volatility index
     'SPY', 'QQQ', 'VTI', 'VOO', 'DIA', 'IWM',  # major ETFs tracking market indices
     'XLK', 'SMH', 'SOXX', 'ARKK',              # tech-focused ETFs
-    'XSD', 'IGV', 'SKYY', 'FINX', 'HACK',      # semis, software, cloud, fintech, cyber
+    'XSD', 'IGV', 'SKYY', 'FINX', 'HACK',      # semis, software, cloud, fintech, cyber\
     'FTEC', 'VGT', 'IYW'                       # broad tech ETFs (Fidelity, Vanguard, iShares)
 ]
 
@@ -47,12 +87,12 @@ CONFIG = {
     'tickers': all_tickers,  # Now using the ticker lists instead of a single symbol
     
     # Date range for data retrieval (format: YYYY-MM-DD)
-    'start_date': '2010-01-01',
-    'end_date': '2025-05-01',
+    'start_date': '2021-01-01',
+    'end_date': '2025-05-13',
     
     # Directory for saving data
     #'save_dir': r"C:\Users\cinco\Desktop\Cinco-HF\results\Charles\Historical Equities Data",
-    'save_dir': "/Users/jazzhashzzz/Desktop/Cinco-HF/results/Charles/Historical Equities Data/4.28",
+    'save_dir': "/Users/jazzhashzzz/Desktop/Cinco-Quant/00_raw_data/5.13",
 
     # API credentials
     'app_key': os.getenv('APP_KEY'),
